@@ -1,0 +1,853 @@
+---
+title: "PRUEBA DENUE"
+author: "Ariel Coto Tapia"
+date: "8/4/2022"
+output: html_document
+---
+
+# Vamos a intentar unificar los archivos csv que proporciona la DENUE para el estado de Veracruz de los años 2012-2021
+
+## Primero vamos a ubicar los archivos
+
+En este caso solo descargue los .csv entonces no hay necesidad de evitar los .txt, diccionarios etcetera; (Aunque hubiera sido buen ejercicio jeje.. perdón)
+
+```{r setup, include=FALSE}
+
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(fs)
+library(tictoc)
+
+#setwd("C:/Users/Jorge C/Desktop/LUZ DE NOCHE")
+
+setwd("C:/Users/cotot/OneDrive/Desktop/LUZ DE NOCHE/1er_Entrega")
+here::i_am("./1er_Entrega/intento_DENUE.Rmd")
+
+
+Veracruz_paths <- dir_info(here::here("./1er_Entrega/DENUE_VER","DENUE")) 
+
+#Aqui ya estan incluidos todos los .csv me estoy ahorrando toda la limpieza de datos de diccionariosm .txt, escrita en 04AggDenueData.Rmd por Daniel Amieva
+
+
+```
+
+#Empezamos con 2013
+
+```{r}
+files_2013<-tibble(Veracruz_paths$path[1])
+
+guess_encoding(files_2013)
+
+csv_2013 <- readr::read_csv(files_2013,
+                    lazy = TRUE,
+                    locale = locale(encoding = "ISO-8859-1"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                )) 
+
+
+
+```
+
+
+A ver... me estan pidiendo las siguientes columnas del DENUE: ID, NOMBRE DE LA UNIDAD ECONOMICA, RAZÓN SOCIAL, CODIGO DE LA CLASE DE ACTIVIDAD SCIAN, NOMBRE DE LA CLASE DE LA ACTIVIDAD, DESCRIPCIÓN ESTRATO PERSONAL OCUPADO, TIPO DE VIALIDAD, TIPO DE ASENTAMIENTO HUMANO, NOMBRE DE ASENTAMIENTO HUMANO, CODIGO POSTAL, CLAVE ENTIDAD, ENTIDAD FEDERATIVA, CLAVE MUNICIPIO, MUNICIPIO, CLAVE LOCALIDAD, LOCALIDAD, AREA GEOESTADISTICA BASICA, MANZANA, TIPO DE ESTABLECIMIENTO, LATITUD, LONGITUD, FECHA DE INCORPORACIÓN AL DENUE.
+
+Algunas columnas que me piden, no estan construidas como tal, hay que limpiar y modificar la base un poco.
+
+#2013
+
+```{r}
+#Primero los datos que si se encuentran en el data principal, hasta nivel de ageb
+data_2013<-csv_2013 %>%
+       dplyr::select(`Llave DENUE`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`Llave DENUE`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+```
+
+
+# 2015
+
+```{r}
+
+files_2015<-tibble(Veracruz_paths$path[2])
+
+
+
+guess_encoding(files_2015)
+
+
+
+
+csv_2015 <- readr::read_csv(files_2015,
+                    lazy = TRUE,
+                    locale = locale(encoding = "UTF-8"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                )) #Por los acentos etc etc, que es un distinto formato..
+# En anteriores codigos he tenido mucho problema con los caracteres especiales, este caso es una muy buena solución 
+# ********** RECORDAR ARIEL **************#
+
+#Notamos que tenemos muchos missing values, ¿ los trataremos...??
+
+
+
+
+                                      
+
+
+data_2015<-csv_2015 %>%
+       dplyr::select(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+```
+
+
+#2016
+
+```{r}
+
+files_2016<-tibble(Veracruz_paths$path[3])
+
+guess_encoding(files_2016)
+
+
+
+
+csv_2016 <- readr::read_csv(files_2016,
+                    lazy = TRUE,
+                    locale = locale(encoding = "UTF-8"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                ))
+
+# Necesito cambiar el nombre de los datos, para que empalmen con los demas....
+
+csv_full_2016<-csv_2016 %>%
+  rename(ID=id,
+         "Nombre de la Unidad Económica"=nom_estab,
+         "Razón social"=raz_social,
+         "Código de la clase de actividad SCIAN"=codigo_act,
+         "Nombre de clase de la actividad"=nombre_act,
+         "Descripcion estrato personal ocupado" =per_ocu,
+         "Tipo de vialidad"  =tipo_vial,
+         "Tipo de asentamiento humano"=tipo_asent,
+         "Nombre de asentamiento humano"=nomb_asent,
+         "Código Postal" =cod_postal,
+         "Clave entidad" =cve_ent,
+         "Entidad federativa" =entidad,
+         "Clave municipio" =cve_mun,
+         "Municipio" =municipio,
+         "Clave localidad"  =cve_loc,
+         "Localidad"  = localidad,
+         "Área geoestadística básica" =ageb,
+         "Manzana"=manzana,
+         "Tipo de establecimiento"  =tipoUniEco,
+         "Latitud"=latitud,
+         "Longitud"=longitud,
+         "Fecha de incorporación al DENUE" =fecha_alta
+         )
+
+#Listo :) , luego agrupo las columnas que necesito...
+
+
+data_2016<-csv_full_2016 %>%
+       dplyr::select(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+```
+
+
+#2017
+
+```{r}
+files_2017<-tibble(Veracruz_paths$path[4])
+
+guess_encoding(files_2017)
+
+
+
+
+csv_2017 <- readr::read_csv(files_2017,
+                    lazy = TRUE,
+                    locale = locale(encoding = "UTF-8"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                ))
+
+#Tiene el mismo tipo de nombre que en el 2016 así que repetire el proceso de cambio de nombre
+
+
+
+csv_full_2017<-csv_2017 %>%
+  dplyr::rename(ID=id,
+         "Nombre de la Unidad Económica"=nom_estab,
+         "Razón social"=raz_social,
+         "Código de la clase de actividad SCIAN"=codigo_act,
+         "Nombre de clase de la actividad"=nombre_act,
+         "Descripcion estrato personal ocupado" =per_ocu,
+         "Tipo de vialidad"  =tipo_vial,
+         "Tipo de asentamiento humano"=tipo_asent,
+         "Nombre de asentamiento humano"=nomb_asent,
+         "Código Postal" =cod_postal,
+         "Clave entidad" =cve_ent,
+         "Entidad federativa" =entidad,
+         "Clave municipio" =cve_mun,
+         "Municipio" =municipio,
+         "Clave localidad"  =cve_loc,
+         "Localidad"  = localidad,
+         "Área geoestadística básica" =ageb,
+         "Manzana"=manzana,
+         "Tipo de establecimiento"  =tipoUniEco,
+         "Latitud"=latitud,
+         "Longitud"=longitud,
+         "Fecha de incorporación al DENUE" =fecha_alta
+         )
+
+
+data_2017<-csv_full_2017 %>%
+       dplyr::select(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+
+
+
+```
+
+#2018
+
+
+```{r}
+
+files_2018<-tibble(Veracruz_paths$path[5])
+
+guess_encoding(files_2018)
+
+
+
+
+csv_2018 <- readr::read_csv(files_2018,
+                    lazy = TRUE,
+                    locale = locale(encoding = "UTF-8"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                ))
+
+#Cambios de nombres...
+
+
+csv_full_2018<-csv_2018 %>%
+  dplyr::rename(ID=id,
+         "Nombre de la Unidad Económica"=nom_estab,
+         "Razón social"=raz_social,
+         "Código de la clase de actividad SCIAN"=codigo_act,
+         "Nombre de clase de la actividad"=nombre_act,
+         "Descripcion estrato personal ocupado" =per_ocu,
+         "Tipo de vialidad"  =tipo_vial,
+         "Tipo de asentamiento humano"=tipo_asent,
+         "Nombre de asentamiento humano"=nomb_asent,
+         "Código Postal" =cod_postal,
+         "Clave entidad" =cve_ent,
+         "Entidad federativa" =entidad,
+         "Clave municipio" =cve_mun,
+         "Municipio" =municipio,
+         "Clave localidad"  =cve_loc,
+         "Localidad"  = localidad,
+         "Área geoestadística básica" =ageb,
+         "Manzana"=manzana,
+         "Tipo de establecimiento"  =tipoUniEco,
+         "Latitud"=latitud,
+         "Longitud"=longitud,
+         "Fecha de incorporación al DENUE" =fecha_alta
+         )
+
+
+data_2018<-csv_full_2018 %>%
+       dplyr::select(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+
+```
+
+
+#2019
+
+
+```{r}
+
+files_2019<-tibble(Veracruz_paths$path[6])
+
+guess_encoding(files_2019)
+
+
+
+
+csv_2019 <- readr::read_csv(files_2019,
+                    lazy = TRUE,
+                    locale = locale(encoding = "ISO-8859-1"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                ))
+
+
+
+csv_full_2019<-csv_2019 %>%
+  dplyr::rename(ID=id,
+         "Nombre de la Unidad Económica"=nom_estab,
+         "Razón social"=raz_social,
+         "Código de la clase de actividad SCIAN"=codigo_act,
+         "Nombre de clase de la actividad"=nombre_act,
+         "Descripcion estrato personal ocupado" =per_ocu,
+         "Tipo de vialidad"  =tipo_vial,
+         "Tipo de asentamiento humano"=tipo_asent,
+         "Nombre de asentamiento humano"=nomb_asent,
+         "Código Postal" =cod_postal,
+         "Clave entidad" =cve_ent,
+         "Entidad federativa" =entidad,
+         "Clave municipio" =cve_mun,
+         "Municipio" =municipio,
+         "Clave localidad"  =cve_loc,
+         "Localidad"  = localidad,
+         "Área geoestadística básica" =ageb,
+         "Manzana"=manzana,
+         "Tipo de establecimiento"  =tipoUniEco,
+         "Latitud"=latitud,
+         "Longitud"=longitud,
+         "Fecha de incorporación al DENUE" =fecha_alta
+         )
+
+
+
+data_2019<-csv_full_2019 %>%
+       dplyr::select(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+
+```
+
+
+#2020
+
+
+```{r}
+
+files_2020<-tibble(Veracruz_paths$path[7])
+
+guess_encoding(files_2020)
+
+
+
+
+csv_2020 <- readr::read_csv(files_2020,
+                    lazy = TRUE,
+                    locale = locale(encoding = "ISO-8859-1"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                ))
+
+
+csv_full_2020<-csv_2020 %>%
+  dplyr::rename(ID=id,
+         "Nombre de la Unidad Económica"=nom_estab,
+         "Razón social"=raz_social,
+         "Código de la clase de actividad SCIAN"=codigo_act,
+         "Nombre de clase de la actividad"=nombre_act,
+         "Descripcion estrato personal ocupado" =per_ocu,
+         "Tipo de vialidad"  =tipo_vial,
+         "Tipo de asentamiento humano"=tipo_asent,
+         "Nombre de asentamiento humano"=nomb_asent,
+         "Código Postal" =cod_postal,
+         "Clave entidad" =cve_ent,
+         "Entidad federativa" =entidad,
+         "Clave municipio" =cve_mun,
+         "Municipio" =municipio,
+         "Clave localidad"  =cve_loc,
+         "Localidad"  = localidad,
+         "Área geoestadística básica" =ageb,
+         "Manzana"=manzana,
+         "Tipo de establecimiento"  =tipoUniEco,
+         "Latitud"=latitud,
+         "Longitud"=longitud,
+         "Fecha de incorporación al DENUE" =fecha_alta
+         )
+
+
+
+data_2020<-csv_full_2020 %>%
+       dplyr::select(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+```
+
+#2021
+
+```{r}
+
+
+files_2021<-tibble(Veracruz_paths$path[8])
+
+guess_encoding(files_2021)
+
+
+
+
+csv_2021 <- readr::read_csv(files_2021,
+                    lazy = TRUE,
+                    locale = locale(encoding = "ISO-8859-1"),
+                    col_types=list(codigo_act = "c", 
+                                  .default = "c"
+                                ))
+
+
+csv_full_2021<-csv_2021 %>%
+  dplyr::rename(ID=id,
+         "Nombre de la Unidad Económica"=nom_estab,
+         "Razón social"=raz_social,
+         "Código de la clase de actividad SCIAN"=codigo_act,
+         "Nombre de clase de la actividad"=nombre_act,
+         "Descripcion estrato personal ocupado" =per_ocu,
+         "Tipo de vialidad"  =tipo_vial,
+         "Tipo de asentamiento humano"=tipo_asent,
+         "Nombre de asentamiento humano"=nomb_asent,
+         "Código Postal" =cod_postal,
+         "Clave entidad" =cve_ent,
+         "Entidad federativa" =entidad,
+         "Clave municipio" =cve_mun,
+         "Municipio" =municipio,
+         "Clave localidad"  =cve_loc,
+         "Localidad"  = localidad,
+         "Área geoestadística básica" =ageb,
+         "Manzana"=manzana,
+         "Tipo de establecimiento"  =tipoUniEco,
+         "Latitud"=latitud,
+         "Longitud"=longitud,
+         "Fecha de incorporación al DENUE" =fecha_alta
+         )
+
+data_2021<-csv_full_2021 %>%
+       dplyr::select(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+        
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+       `Fecha de incorporación al DENUE` ) %>% 
+  group_by(`ID`,
+              `Nombre de la Unidad Económica`,
+        `Clave entidad`,
+         `Entidad federativa`,
+         `Clave municipio`,
+        `Razón social`,
+         `Municipio`,
+        `Área geoestadística básica`,
+          `Código de la clase de actividad SCIAN`,
+         `Nombre de clase de la actividad`,
+         
+        `Tipo de vialidad`,
+         `Descripcion estrato personal ocupado`,
+             `Tipo de asentamiento humano`,
+        `Nombre de asentamiento humano`,
+        `Código Postal`,
+        `Clave localidad`,
+        `Localidad`,
+        `Manzana`,
+        `Tipo de establecimiento`,
+        `Latitud`,
+        `Longitud`,
+        `Fecha de incorporación al DENUE` 
+  ) %>% 
+  count()
+
+```
+
+
+
+# Ahora a unificar los CSV's
+
+```{r}
+DENUE<-bind_rows(data_2013 %>%
+  mutate(year="2013"),
+  data_2015 %>%
+      mutate(year="2015"),
+  data_2016 %>%
+    mutate(year="2016"),
+  data_2017 %>%
+    mutate(year="2017"),
+  data_2018 %>%
+    mutate(year="2018"),
+  data_2019 %>%
+    mutate(year="2019"),
+  data_2020 %>%
+    mutate(year="2020"),
+  data_2021 %>%
+    mutate(year="2021")
+    )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
